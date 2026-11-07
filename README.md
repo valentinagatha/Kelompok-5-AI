@@ -1,6 +1,6 @@
 # Kelompok-5-AI
 
-## Masalah dalam Cloud System:
+## Masalah dalam Cloud System;
 1. memerlukan internet yg stabil untuk bisa mengakses data-data di cloud sehingga tidak accessible kapan saja dan di mana saja
 2. seringkali lupa mematikan setting sinkronisasi cloud ketika ingin menghapus data dari satu device sehingga di cloud ikut terhapus
 3. seringkali upload file yang sama berkali-kali sehingga cloud storage penuh 
