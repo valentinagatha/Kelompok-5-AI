@@ -6,7 +6,7 @@
 3. seringkali upload file yang sama berkali-kali sehingga cloud storage penuh 
 4. auto backup membuat berbagai jenis foto tercampur (misal: foto pemandangan dengan foto berkas formal) sehingga tidak lgsg tersaring
 5. format file yang di-upload di satu device tidak mendukung di device lain
-6. seringkali lupa mematikan fitur langganan ketika sudah tidak butuh storage cloud lagi
+6. seringkali lupa mematikan fitur langganan ketika sudah tidak butuh storage cloud lagi.
 7. sharing cloud membuat file-file kita masuk ke device orang lain
 8. bingung bagaimana cara transfer data-data di cloud ketika beli hp dengan merek yang berbeda
 9. penyimpanan device yang masih penuh padahal sudah aktivasi cloud
