@@ -1,6 +1,6 @@
 # Kelompok-5-AI
 
-## Masalah dalam Cloud System;
+## Masalah dalam Cloud System:
 1. memerlukan internet yg stabil untuk bisa mengakses data-data di cloud sehingga tidak accessible kapan saja dan di mana saja
 2. seringkali lupa mematikan setting sinkronisasi cloud ketika ingin menghapus data dari satu device sehingga di cloud ikut terhapus
 3. seringkali upload file yang sama berkali-kali sehingga cloud storage penuh 
@@ -46,7 +46,7 @@
 43. pusat data AI mengkonsumsi listrik dalam jumlah besar sehingga meningkatkan kebutuhan energi dan biaya operasional
 44. saham teknologi dan obligasi AI mengalami penurunan tajam yang memicu kekhawatiran terhadap investasi AI
 45. gangguan google cloud menyebabkan puluhan situs web dan aplikasi mengalami masalah layanan
-46. keamanan data dan hak kekayaan intelektual di cloud
+46. keamanan data dan hak kekayaan intelektual di cloud.
 47. kerentanan keamanan pada sistem cloud akibat kebocoran kode
 48. konsumsi energi cloud computing yang semakin tinggi
 49. ketidakstabilan investasi dan biaya layanan cloud
