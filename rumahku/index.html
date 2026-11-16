@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#101716">
+<title>Rumahku — Studio Desain Ruangan 3D</title>
+<meta name="description" content="Game desain interior 3D gratis: 50+ aset, template ruangan, desain bebas, undo/redo, tanpa iklan dan tanpa koin.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.2 12 4l8 7.2V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      <span>Rumahku</span>
+      <em>gratis, tanpa koin</em>
+    </div>
+
+    <nav class="modes" aria-label="Mode">
+      <button class="mode-btn is-active" data-mode="free">Desain Bebas</button>
+      <button class="mode-btn" data-mode="template">Template</button>
+      <button class="mode-btn" data-mode="challenge">Tantangan</button>
+    </nav>
+
+    <div class="tools">
+      <button class="icon-btn" id="btn-undo" title="Undo (Ctrl+Z)" aria-label="Undo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H15a5 5 0 0 1 0 10H8M9 7 5 11l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7H9a5 5 0 0 0 0 10h7M15 7l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-grid" title="Grid (G)" aria-label="Grid">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16M4 15h16M9 4v16M15 4v16" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+      <button class="btn ghost" id="btn-photo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+        Foto HD
+      </button>
+      <button class="btn primary" id="btn-save">Simpan</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <canvas id="scene" aria-label="Area desain 3D"></canvas>
+
+    <div class="badge-free" id="badge-free">
+      <strong>Semua aset gratis</strong>
+      <span>tanpa iklan · tanpa timer · tanpa koin</span>
+    </div>
+
+    <div class="hint" id="hint">
+      <b>Geser</b> furnitur untuk atur · <b>klik kanan / dua jari</b> geser kamera · <b>scroll</b> zoom
+      <button id="hint-close" aria-label="Tutup petunjuk">×</button>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- katalog -->
+    <section class="panel panel-catalog" id="panel-catalog" aria-label="Katalog aset">
+      <div class="panel-head">
+        <h2>Katalog <span id="catalog-count"></span></h2>
+        <button class="sheet-close" data-close="catalog" aria-label="Tutup katalog">×</button>
+      </div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input id="search" type="search" placeholder="Cari: tempat tidur, sofa, pohon…" autocomplete="off">
+      </div>
+      <div class="chips" id="cats"></div>
+      <div class="items" id="items"></div>
+    </section>
+
+    <!-- panel kanan -->
+    <aside class="panel panel-side" id="panel-side" aria-label="Pengaturan">
+      <div class="side-tabs" role="tablist">
+        <button class="side-tab is-active" data-tab="item" role="tab">Item</button>
+        <button class="side-tab" data-tab="room" role="tab">Ruangan</button>
+        <button class="side-tab" data-tab="goals" role="tab">Target</button>
+        <button class="sheet-close" data-close="side" aria-label="Tutup panel">×</button>
+      </div>
+
+      <div class="side-body" id="tab-item">
+        <div id="item-empty" class="empty">
+          <p>Belum ada item dipilih.</p>
+          <p class="muted">Klik furnitur di ruangan, atau tambah dari katalog.</p>
+        </div>
+        <div id="item-controls" hidden>
+          <h3 id="item-name">—</h3>
+          <p class="muted" id="item-size"></p>
+
+          <label class="field">
+            <span>Warna / finishing</span>
+            <div class="swatches" id="item-colors"></div>
+          </label>
+
+          <label class="field">
+            <span>Rotasi <b id="rot-val">0°</b></span>
+            <input type="range" id="rot" min="0" max="345" step="15" value="0">
+          </label>
+
+          <label class="field">
+            <span>Ukuran <b id="scale-val">100%</b></span>
+            <input type="range" id="scale" min="60" max="150" step="5" value="100">
+          </label>
+
+          <label class="field">
+            <span>Tinggi <b id="height-val">0.00 m</b></span>
+            <input type="range" id="height" min="0" max="200" step="2" value="0">
+          </label>
+
+          <div class="row">
+            <button class="btn ghost" id="btn-duplicate">Duplikat</button>
+            <button class="btn danger" id="btn-delete">Hapus</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-body" id="tab-room" hidden>
+        <label class="field">
+          <span>Lebar ruangan <b id="w-val">6.0 m</b></span>
+          <input type="range" id="room-w" min="3" max="10" step="0.2" value="6">
+        </label>
+        <label class="field">
+          <span>Panjang ruangan <b id="d-val">5.0 m</b></span>
+          <input type="range" id="room-d" min="3" max="10" step="0.2" value="5">
+        </label>
+
+        <label class="field">
+          <span>Warna dinding</span>
+          <div class="swatches" id="wall-colors"></div>
+        </label>
+
+        <label class="field">
+          <span>Lantai</span>
+          <div class="floors" id="floors"></div>
+        </label>
+
+        <label class="switch">
+          <input type="checkbox" id="outdoor">
+          <span>Mode luar ruangan (taman)</span>
+        </label>
+
+        <div class="row">
+          <button class="btn ghost" id="btn-clear">Kosongkan ruangan</button>
+        </div>
+        <p class="muted small">Semua pengaturan gratis. Tidak ada kunci level, koin, atau timer.</p>
+      </div>
+
+      <div class="side-body" id="tab-goals" hidden>
+        <h3 id="challenge-name">Tantangan</h3>
+        <p class="muted" id="challenge-brief">Pilih tantangan untuk mulai. Target dinilai otomatis, tanpa hadiah berbayar.</p>
+        <div id="goals-list" class="goals"></div>
+        <div class="row">
+          <button class="btn ghost" id="btn-open-challenges">Ganti tantangan</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- tab bar mobile -->
+    <nav class="mobile-tabs" aria-label="Panel">
+      <button data-open="catalog">Katalog</button>
+      <button data-open="side" data-tab="item">Item</button>
+      <button data-open="side" data-tab="room">Ruangan</button>
+      <button data-open="side" data-tab="goals">Target</button>
+    </nav>
+  </main>
+
+  <!-- modal template / tantangan -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-card">
+      <header>
+        <h2 id="modal-title">Template ruangan</h2>
+        <button class="sheet-close" id="modal-close" aria-label="Tutup">×</button>
+      </header>
+      <p class="muted" id="modal-sub">Mulai dari template, lalu ubah apa pun sesukamu — template tidak mengunci item.</p>
+      <div class="cards" id="modal-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/three.min.js"></script>
+<script src="js/catalog.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
