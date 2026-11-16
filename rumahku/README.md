@@ -38,7 +38,29 @@ Tidak butuh install, akun, atau koneksi internet — Three.js sudah di-vendor di
 - **Kustomisasi**: warna/finishing per item, rotasi, skala 60–150%, tinggi, warna dinding, 6 jenis lantai, ukuran ruangan 3–10 m, mode taman (outdoor).
 - **Foto HD 1920×1080 gratis**, tanpa watermark dan tanpa ikon "render berbayar".
 - **Responsif**: panel katalog + panel properti di desktop, bottom sheet + tab bar di ponsel.
+- **Tema gelap & terang** — tombol ☾/☀ di topbar atau tombol `T`. Tema mengubah chrome UI *dan* pencahayaan scene 3D (langit-langit malam, lampu ruangan hangat, vignette), tersimpan di `localStorage` dan ikut preferensi OS saat pertama buka.
 - **Nol monetisasi**: tanpa iklan, koin, gems, energi, timer, langganan, atau paywall.
+
+## Tema
+
+| | Gelap (default) | Terang |
+|---|---|---|
+| Aksen | `#2dd4bf` di atas `#0a0f0e` | `#0f766e` di atas `#fcfaf5` |
+| Kontras teks utama | 17.9:1 | 16.8:1 |
+| Kontras teks sekunder | 10.6:1 | 6.3:1 |
+| Scene 3D | sun 1.2, hemi 0.42, lampu hangat 1.35, exposure 0.93 | sun 2.1, hemi 0.85, exposure 1.02 |
+
+Semua pasangan teks lolos WCAG AA (≥ 4.5:1); garis/tepi kontrol ≥ 3:1.
+
+## Publikasi ke web
+
+Aplikasi ini statis (tanpa build, tanpa server) — cukup unggah folder `rumahku/`.
+
+1. **GitHub Pages** (paling permanen, butuh akses admin repo): Settings → Pages → Source: *Deploy from a branch* → branch `main`, folder `/` (root) → buka `https://<user>.github.io/<repo>/rumahku/`.
+2. **Netlify Drop** (paling cepat, tanpa Git): buka [app.netlify.com/drop](https://app.netlify.com/drop), tarik folder `rumahku` ke halaman itu → dapat URL `https://<nama>.netlify.app`.
+3. **tiiny.host** — unggah zip folder, dapat link dalam hitungan detik.
+4. **CDN dari repo publik** (tanpa deploy): `https://raw.githack.com/<user>/<repo>/main/rumahku/index.html` — jalan karena Three.js di-vendor lokal.
+
 
 ## Peta ke temuan riset
 

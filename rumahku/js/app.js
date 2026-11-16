@@ -61,7 +61,11 @@
   sun.shadow.camera.near = 0.5;
   sun.shadow.camera.far = 40;
   scene.add(sun);
-  scene.add(new THREE.AmbientLight('#ffffff', 0.28));
+  const ambient = new THREE.AmbientLight('#ffffff', 0.28);
+  scene.add(ambient);
+  const lamp = new THREE.PointLight('#ffcf94', 0, 18, 2);
+  lamp.position.set(0, 3.4, 0);
+  scene.add(lamp);
 
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(80, 80),
@@ -71,6 +75,52 @@
   ground.position.y = -0.03;
   ground.receiveShadow = true;
   scene.add(ground);
+
+  // ---------------------------------------------------------------- tema gelap / terang
+  const THEME_KEY = 'rumahku.theme.v1';
+  const SCENE_THEME = {
+    dark: {
+      bg: '#0b1312', fogNear: 16, fogFar: 42, ground: '#0a1211',
+      hemiSky: '#cfe9e2', hemiGround: '#16241f', hemi: 0.42, sun: 1.2, ambient: 0.1,
+      exposure: 0.93, lamp: 1.35,
+      gridMajor: '#3d5a52', gridMinor: '#2b423c', outline: 0x2dd4bf
+    },
+    light: {
+      bg: '#dfe7ea', fogNear: 26, fogFar: 55, ground: '#cdd8c9',
+      hemiSky: '#ffffff', hemiGround: '#c9c2b4', hemi: 0.85, sun: 2.1, ambient: 0.28,
+      exposure: 1.02, lamp: 0,
+      gridMajor: '#9fb0ac', gridMinor: '#c3cfca', outline: 0x0f766e
+    }
+  };
+  let theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+
+  function themeCfg() { return SCENE_THEME[theme]; }
+
+  function applyTheme(next, announce) {
+    theme = next === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = theme;
+    const c = themeCfg();
+    scene.background = new THREE.Color(c.bg);
+    scene.fog = new THREE.Fog(c.bg, c.fogNear, c.fogFar);
+    ground.material.color.set(c.ground);
+    hemi.color.set(c.hemiSky);
+    hemi.groundColor.set(c.hemiGround);
+    hemi.intensity = c.hemi;
+    sun.intensity = c.sun;
+    ambient.intensity = c.ambient;
+    renderer.toneMappingExposure = c.exposure;
+    lamp.intensity = c.lamp;
+    if (selectionHelper) selectionHelper.material.color.setHex(c.outline);
+    refreshGrid();
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#0a0f0e' : '#f1eee7');
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+    const btn = document.getElementById('btn-theme');
+    if (btn) btn.title = theme === 'dark' ? 'Mode terang' : 'Mode gelap';
+    if (announce) toast(theme === 'dark' ? 'Mode gelap aktif' : 'Mode terang aktif');
+  }
+
+  function toggleTheme() { applyTheme(theme === 'dark' ? 'light' : 'dark', true); }
 
   const roomGroup = new THREE.Group();
   const itemsGroup = new THREE.Group();
@@ -221,20 +271,25 @@
       roomGroup.add(b2); baseboards.push(b2);
     }
 
-    if (gridHelper) { scene.remove(gridHelper); gridHelper.geometry.dispose(); gridHelper.material.dispose(); gridHelper = null; }
-    if (state.grid && !outdoor) {
-      gridHelper = new THREE.GridHelper(Math.max(r.w, r.d), Math.round(Math.max(r.w, r.d) * 2), '#9fb0ac', '#c3cfca');
-      gridHelper.position.y = 0.004;
-      gridHelper.material.opacity = 0.5;
-      gridHelper.material.transparent = true;
-      scene.add(gridHelper);
-    }
+    refreshGrid();
 
     // bayangan matahari mengikuti ukuran ruangan
     const s = sun.shadow.camera;
     const ext = Math.max(r.w, r.d) * 0.9 + 2;
     s.left = -ext; s.right = ext; s.top = ext; s.bottom = -ext;
     s.updateProjectionMatrix();
+  }
+
+  function refreshGrid() {
+    if (gridHelper) { scene.remove(gridHelper); gridHelper.geometry.dispose(); gridHelper.material.dispose(); gridHelper = null; }
+    const r = state.room;
+    if (!state.grid || r.outdoor) return;
+    const c = themeCfg();
+    gridHelper = new THREE.GridHelper(Math.max(r.w, r.d), Math.round(Math.max(r.w, r.d) * 2), c.gridMajor, c.gridMinor);
+    gridHelper.position.y = 0.004;
+    gridHelper.material.opacity = theme === 'dark' ? 0.6 : 0.5;
+    gridHelper.material.transparent = true;
+    scene.add(gridHelper);
   }
 
   // ---------------------------------------------------------------- item
@@ -494,6 +549,7 @@
   canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
   canvas.addEventListener('pointerdown', function (e) {
+    hideHint();
     canvas.setPointerCapture(e.pointerId);
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     hideHint();
@@ -659,6 +715,7 @@
       const el = document.getElementById('tab-' + t);
       if (el) el.hidden = t !== tab;
     });
+    if (typeof syncMobileTabs === 'function') syncMobileTabs();
   }
 
   function renderChips() {
@@ -966,15 +1023,27 @@
   }
 
   // ---------------------------------------------------------------- sheets (mobile)
+  function syncMobileTabs() {
+    const cat = $('#panel-catalog').classList.contains('is-open');
+    const side = $('#panel-side').classList.contains('is-open');
+    $$('.mobile-tabs button').forEach(function (b) {
+      let on;
+      if (b.dataset.open === 'catalog') on = cat;
+      else on = side && (b.dataset.tab || 'item') === activeTab;
+      b.classList.toggle('is-active', !!on);
+    });
+  }
   function openSheet(which) {
     closeSheet(which === 'catalog' ? 'side' : 'catalog');
     const el = which === 'catalog' ? $('#panel-catalog') : $('#panel-side');
     el.classList.add('is-open');
     if (which === 'side') setTab(activeTab);
+    syncMobileTabs();
   }
   function closeSheet(which) {
     const el = which === 'catalog' ? $('#panel-catalog') : $('#panel-side');
     el.classList.remove('is-open');
+    syncMobileTabs();
   }
 
   // ---------------------------------------------------------------- persistence
@@ -1243,6 +1312,7 @@
     b.addEventListener('click', function () { closeSheet(b.dataset.close); });
   });
 
+  $('#btn-theme').addEventListener('click', toggleTheme);
   $('#hint-close').addEventListener('click', hideHint);
   $('#hint').addEventListener('click', function (e) { if (e.target.id === 'hint') hideHint(); });
 
@@ -1257,6 +1327,7 @@
     }
     if (meta && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
     if (meta && e.key.toLowerCase() === 's') { e.preventDefault(); saveNow(false); return; }
+    if (!meta && e.key.toLowerCase() === 't') { toggleTheme(); return; }
     if (!state.selectedId) return;
     const rec = getItem(state.selectedId);
     if (!rec) return;
@@ -1297,10 +1368,12 @@
     buildRoom();
     rebuildItems();
     fitCamera();
+    applyTheme(theme, false);
     syncUI();
     updateUndoUI();
     animate();
     setTimeout(function () { if (!loaded) toast('Contoh kamar dimuat — semua item bisa diubah'); }, 900);
+    setTimeout(hideHint, window.matchMedia('(max-width: 900px)').matches ? 7000 : 14000);
   }
 
   window.addEventListener('resize', resize);
@@ -1326,6 +1399,9 @@
     },
     photo: photo,
     renderPhoto: renderPhotoData,
+    setTheme: function (t) { applyTheme(t, false); },
+    toggleTheme: toggleTheme,
+    theme: function () { return theme; },
     save: function () { saveNow(true); },
     counts: function () { return { items: state.items.length, cat: K.items.length }; },
     goals: function () {
