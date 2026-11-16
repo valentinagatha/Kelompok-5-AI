@@ -1,6 +1,8 @@
 # Rumahku — studio desain ruangan 3D (gratis, tanpa koin)
 
-Game/web app desain interior yang bisa langsung dimainkan di browser. Dibuat sebagai jawaban atas riset 35 sumber di folder [`../tugas 16 november`](../tugas%2016%20november): keluhan pemain hampir selalu soal **monetisasi dan kebebasan yang dikunci**, bukan grafis.
+Game/web app desain interior yang bisa langsung dimainkan di browser.
+
+**Live:** https://shalinakhr.github.io/rumahku/ — buka di HP atau laptop, tanpa install. Dibuat sebagai jawaban atas riset 35 sumber di folder [`../tugas 16 november`](../tugas%2016%20november): keluhan pemain hampir selalu soal **monetisasi dan kebebasan yang dikunci**, bukan grafis.
 
 ## Cara main
 
