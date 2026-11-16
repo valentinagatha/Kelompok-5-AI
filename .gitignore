@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+._*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Node (kalau nanti pakai tooling/build)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json.bak
+
+# Env & secrets
+.env
+.env.local
+
+# Build output
+dist/
+build/
+*.log
