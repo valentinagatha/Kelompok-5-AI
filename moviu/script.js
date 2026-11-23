@@ -162,7 +162,7 @@
     if (!core || typeof core.createSampleFiles !== 'function') return;
     const samples = core.createSampleFiles();
     addFiles(samples);
-    showToast('✨ 5 file contoh (kontak, kalender, csv, catatan, foto) dimuat!');
+    showToast('5 file contoh (kontak, kalender, csv, catatan, foto) dimuat!');
   }
 
   function renderReview() {
@@ -727,7 +727,8 @@
           password,
           phone,
           agreedToTerms: true,
-          agreedAt: new Date().toISOString()
+          agreedAt: new Date().toISOString(),
+          registeredAt: new Date().toISOString()
         };
 
         users.push(newUser);

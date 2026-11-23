@@ -1,4 +1,9 @@
 {
   "version": 2,
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/admin", "destination": "/moviu/admin.html" },
+    { "source": "/admin.html", "destination": "/moviu/admin.html" },
+    { "source": "/(.*)", "destination": "/moviu/$1" }
+  ]
 }

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Moviu</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%236255e7'/><text x='50%' y='68%' fill='%23ffffff' font-family='sans-serif' font-size='65' font-weight='800' text-anchor='middle'>m</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --purple: #6255e7;
+      --purple-light: #f0eeff;
+      --bg: #f7f8fc;
+      --card: #ffffff;
+      --text: #1e263a;
+      --muted: #59647a;
+      --line: #e7e9f1;
+      --green: #22c55e;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --blue: #3b82f6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* Login gate */
+    #login-gate {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+    }
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 32px rgba(98,85,231,0.08);
+    }
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--purple);
+    }
+    .login-brand .brand-mark {
+      width: 36px; height: 36px;
+      background: var(--purple);
+      color: #fff;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900;
+    }
+    .login-card h1 { font-size: 22px; margin-bottom: 6px; }
+    .login-card p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .login-field { margin-bottom: 16px; }
+    .login-field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .login-field input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .login-field input:focus { border-color: var(--purple); }
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .login-btn:hover { opacity: 0.88; }
+    .login-error { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; display: none; }
+
+    /* Dashboard layout */
+    #dashboard { display: none; }
+    .admin-header {
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 17px;
+      color: var(--purple);
+      text-decoration: none;
+    }
+    .admin-brand .brand-mark {
+      width: 30px; height: 30px;
+      background: var(--purple);
+      color: #fff;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 900;
+    }
+    .admin-badge {
+      background: var(--purple-light);
+      color: var(--purple);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .05em;
+    }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .header-time { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .logout-btn {
+      background: none;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all .2s;
+    }
+    .logout-btn:hover { border-color: var(--red); color: var(--red); }
+    .dash-wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+    /* Metric cards */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .metric-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .metric-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .icon-purple { background: var(--purple-light); color: var(--purple); }
+    .icon-green  { background: #dcfce7; color: #16a34a; }
+    .icon-blue   { background: #dbeafe; color: #2563eb; }
+    .icon-amber  { background: #fef9c3; color: #b45309; }
+    .metric-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .metric-value { font-size: 32px; font-weight: 800; letter-spacing: -.03em; color: var(--text); line-height: 1; }
+    .metric-sub { font-size: 12px; color: var(--muted); }
+
+    /* Cards row */
+    .cards-row {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 800px) { .cards-row { grid-template-columns: 1fr; } }
+    .dash-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .dash-card-head {
+      padding: 18px 24px 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dash-card-head h2 { font-size: 15px; font-weight: 700; }
+    .dash-card-head span { font-size: 12px; color: var(--muted); }
+    .chart-wrap { padding: 20px 24px; height: 240px; position: relative; }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+      background: #f8f9fb;
+      border-bottom: 1px solid var(--line);
+    }
+    tbody tr { border-bottom: 1px solid var(--line); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbff; }
+    td { padding: 11px 16px; color: var(--text); vertical-align: middle; }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-green { background: #dcfce7; color: #16a34a; }
+    .badge-blue  { background: #dbeafe; color: #2563eb; }
+    .badge-amber { background: #fef9c3; color: #92400e; }
+    .badge-gray  { background: var(--line); color: var(--muted); }
+    .empty-state { padding: 40px 24px; text-align: center; color: var(--muted); font-size: 14px; }
+
+    /* Refresh bar */
+    .refresh-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .refresh-bar h1 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+      transition: border-color .2s;
+    }
+    .refresh-btn:hover { border-color: var(--purple); color: var(--purple); }
+  </style>
+</head>
+<body>
+
+<!-- ==================== LOGIN GATE ==================== -->
+<div id="login-gate">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">m</div>
+      <span>moviu.</span>
+    </div>
+    <h1>Admin Dashboard</h1>
+    <p>Masuk dengan akun administrator untuk melihat data traffic, pengguna, dan transaksi.</p>
+    <div class="login-error" id="login-error">Kata sandi salah. Coba lagi.</div>
+    <div class="login-field">
+      <label for="admin-password">Kata Sandi Admin</label>
+      <input type="password" id="admin-password" placeholder="Masukkan kata sandi" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="login-btn">Masuk ke Dashboard</button>
+  </div>
+</div>
+
+<!-- ==================== DASHBOARD ==================== -->
+<div id="dashboard">
+  <header class="admin-header">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <a href="./index.html" class="admin-brand">
+        <div class="brand-mark">m</div>
+        <span>moviu.</span>
+      </a>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <div class="header-right">
+      <span class="header-time" id="header-time"></span>
+      <button class="logout-btn" id="logout-btn">Keluar</button>
+    </div>
+  </header>
+
+  <div class="dash-wrap">
+    <div class="refresh-bar">
+      <h1>Dashboard</h1>
+      <button class="refresh-btn" id="refresh-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh Data
+      </button>
+    </div>
+
+    <!-- METRIC CARDS -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-icon icon-purple">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <span class="metric-label">Total Pengguna</span>
+        <span class="metric-value" id="m-users">0</span>
+        <span class="metric-sub">Akun terdaftar (lokal)</span>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon icon-green">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <span class="metric-label">Sesi Aktif</span>
+        <span class="metric-value" id="m-sessions">0</span>
+        <span class="metric-sub">Pengguna sedang login</span>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon icon-blue">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
+        <span class="metric-label">Transaksi</span>
+        <span class="metric-value" id="m-transactions">0</span>
+        <span class="metric-sub">Paket dibeli (simulasi)</span>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon icon-amber">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <span class="metric-label">Pendapatan</span>
+        <span class="metric-value" id="m-revenue">Rp0</span>
+        <span class="metric-sub">Total simulasi transaksi</span>
+      </div>
+    </div>
+
+    <!-- CHART + PAGE VIEWS -->
+    <div class="cards-row">
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <h2>Registrasi Pengguna (7 Hari Terakhir)</h2>
+          <span id="chart-range">Memuat...</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="reg-chart"></canvas>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <h2>Paket Terpopuler</h2>
+          <span>Distribusi pembelian</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="pkg-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- USER TABLE -->
+    <div class="dash-card" style="margin-bottom:24px;">
+      <div class="dash-card-head">
+        <h2>Daftar Pengguna Terdaftar</h2>
+        <span id="user-count-label">0 pengguna</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nama</th>
+              <th>Email</th>
+              <th>No. HP / WA</th>
+              <th>Waktu Daftar</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="user-table-body">
+            <tr><td colspan="6" class="empty-state">Belum ada pengguna terdaftar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TRANSACTION TABLE -->
+    <div class="dash-card" style="margin-bottom:40px;">
+      <div class="dash-card-head">
+        <h2>Riwayat Transaksi (Simulasi)</h2>
+        <span id="tx-count-label">0 transaksi</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Pengguna</th>
+              <th>Paket</th>
+              <th>Nominal</th>
+              <th>Waktu</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tx-table-body">
+            <tr><td colspan="6" class="empty-state">Belum ada transaksi.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== CONFIG =====================
+// Ganti password ini sesuai kebutuhan
+const ADMIN_PASSWORD = 'moviu@admin2026';
+const SESSION_KEY = 'moviu_admin_session';
+
+// ===================== LOGIN =====================
+document.getElementById('login-btn').addEventListener('click', function() {
+  const pw = document.getElementById('admin-password').value;
+  if (pw === ADMIN_PASSWORD) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    showDashboard();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('admin-password').value = '';
+  }
+});
+document.getElementById('admin-password').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+document.getElementById('logout-btn').addEventListener('click', function() {
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+});
+document.getElementById('refresh-btn').addEventListener('click', loadDashboard);
+
+// Auto-login if session exists
+if (sessionStorage.getItem(SESSION_KEY) === '1') {
+  showDashboard();
+}
+
+function showDashboard() {
+  document.getElementById('login-gate').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadDashboard();
+  startClock();
+}
+
+// ===================== CLOCK =====================
+function startClock() {
+  function tick() {
+    const now = new Date();
+    document.getElementById('header-time').textContent =
+      now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) +
+      ' — ' + now.toLocaleTimeString('id-ID');
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ===================== DATA HELPERS =====================
+function getRegisteredUsers() {
+  try {
+    return JSON.parse(localStorage.getItem('moviu_registered_users') || '[]');
+  } catch { return []; }
+}
+
+function getCurrentSession() {
+  try {
+    return JSON.parse(localStorage.getItem('moviu_auth_user') || 'null');
+  } catch { return null; }
+}
+
+function getTransactions() {
+  try {
+    return JSON.parse(localStorage.getItem('moviu_transactions') || '[]');
+  } catch { return []; }
+}
+
+function formatDate(ts) {
+  if (!ts) return '-';
+  return new Date(ts).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function formatRupiah(n) {
+  return 'Rp' + Number(n).toLocaleString('id-ID');
+}
+
+// ===================== LOAD DASHBOARD =====================
+let regChart = null;
+let pkgChart = null;
+
+function loadDashboard() {
+  const users = getRegisteredUsers();
+  const session = getCurrentSession();
+  const transactions = getTransactions();
+
+  // Metric cards
+  document.getElementById('m-users').textContent = users.length;
+  document.getElementById('m-sessions').textContent = session ? 1 : 0;
+  document.getElementById('m-transactions').textContent = transactions.length;
+
+  const revenue = transactions.reduce(function(s, t) { return s + (Number(t.amount) || 0); }, 0);
+  document.getElementById('m-revenue').textContent = formatRupiah(revenue);
+
+  // User table
+  const userTbody = document.getElementById('user-table-body');
+  document.getElementById('user-count-label').textContent = users.length + ' pengguna';
+  if (users.length === 0) {
+    userTbody.innerHTML = '<tr><td colspan="6" class="empty-state">Belum ada pengguna terdaftar. Daftar akun di <a href="./app.html" style="color:#6255e7">Aplikasi Moviu</a>.</td></tr>';
+  } else {
+    userTbody.innerHTML = users.map(function(u, i) {
+      const isActive = session && session.email === u.email;
+      return '<tr>' +
+        '<td style="color:var(--muted);font-weight:600;">' + (i+1) + '</td>' +
+        '<td style="font-weight:600;">' + escHtml(u.name || '-') + '</td>' +
+        '<td style="color:var(--muted);">' + escHtml(u.email || '-') + '</td>' +
+        '<td>' + escHtml(u.phone || '-') + '</td>' +
+        '<td style="color:var(--muted);font-size:12px;">' + formatDate(u.registeredAt || u.createdAt) + '</td>' +
+        '<td><span class="badge ' + (isActive ? 'badge-green' : 'badge-gray') + '">' + (isActive ? 'Aktif' : 'Offline') + '</span></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // Transaction table
+  const txTbody = document.getElementById('tx-table-body');
+  document.getElementById('tx-count-label').textContent = transactions.length + ' transaksi';
+  if (transactions.length === 0) {
+    txTbody.innerHTML = '<tr><td colspan="6" class="empty-state">Belum ada transaksi. Data akan muncul otomatis saat pengguna melakukan pembelian paket.</td></tr>';
+  } else {
+    txTbody.innerHTML = transactions.map(function(t, i) {
+      const statusClass = t.status === 'success' ? 'badge-green' : t.status === 'pending' ? 'badge-amber' : 'badge-gray';
+      return '<tr>' +
+        '<td style="color:var(--muted);font-weight:600;">' + (i+1) + '</td>' +
+        '<td>' + escHtml(t.userEmail || '-') + '</td>' +
+        '<td style="font-weight:600;">' + escHtml(t.packageName || '-') + '</td>' +
+        '<td style="color:var(--purple);font-weight:700;">' + formatRupiah(t.amount || 0) + '</td>' +
+        '<td style="color:var(--muted);font-size:12px;">' + formatDate(t.createdAt) + '</td>' +
+        '<td><span class="badge ' + statusClass + '">' + (t.status || 'pending') + '</span></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // Charts
+  buildRegChart(users);
+  buildPkgChart(transactions);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===================== CHARTS =====================
+function buildRegChart(users) {
+  const ctx = document.getElementById('reg-chart').getContext('2d');
+  const labels = [];
+  const data = [];
+  const today = new Date();
+  for (let d = 6; d >= 0; d--) {
+    const day = new Date(today);
+    day.setDate(today.getDate() - d);
+    const label = day.toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short' });
+    labels.push(label);
+    const count = users.filter(function(u) {
+      const ts = u.registeredAt || u.createdAt;
+      if (!ts) return false;
+      const ud = new Date(ts);
+      return ud.getFullYear() === day.getFullYear() &&
+             ud.getMonth()    === day.getMonth() &&
+             ud.getDate()     === day.getDate();
+    }).length;
+    data.push(count);
+  }
+  document.getElementById('chart-range').textContent = labels[0] + ' – ' + labels[6];
+
+  if (regChart) regChart.destroy();
+  regChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Registrasi',
+        data: data,
+        backgroundColor: 'rgba(98,85,231,0.18)',
+        borderColor: '#6255e7',
+        borderWidth: 2,
+        borderRadius: 6,
+        hoverBackgroundColor: 'rgba(98,85,231,0.35)',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: '#f0f0f8' } },
+        x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function buildPkgChart(transactions) {
+  const ctx = document.getElementById('pkg-chart').getContext('2d');
+  const counts = { 'Paket Dasar': 0, 'Paket Lengkap (Pro)': 0, 'Paket Toko/Konter': 0, 'Lainnya': 0 };
+  transactions.forEach(function(t) {
+    const name = t.packageName || '';
+    if (counts[name] !== undefined) counts[name]++;
+    else counts['Lainnya']++;
+  });
+  const labels = Object.keys(counts);
+  const data = Object.values(counts);
+
+  if (pkgChart) pkgChart.destroy();
+
+  // If no transactions, show placeholder
+  const displayData = data.every(function(v){ return v === 0; }) ? [1,1,1,1] : data;
+  const isPlaceholder = data.every(function(v){ return v === 0; });
+
+  pkgChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: displayData,
+        backgroundColor: isPlaceholder
+          ? ['#f0f0f8','#f0f0f8','#f0f0f8','#f0f0f8']
+          : ['#6255e7','#22c55e','#3b82f6','#f59e0b'],
+        borderWidth: 0,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 11 }, boxWidth: 12, padding: 12 }
+        },
+        tooltip: { enabled: !isPlaceholder }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
