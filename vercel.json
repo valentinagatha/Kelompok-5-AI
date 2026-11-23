@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/moviu/index.html" },
+    { "source": "/layanan", "destination": "/moviu/layanan.html" },
+    { "source": "/layanan.html", "destination": "/moviu/layanan.html" },
+    { "source": "/syarat-ketentuan", "destination": "/moviu/syarat-ketentuan.html" },
+    { "source": "/syarat-ketentuan.html", "destination": "/moviu/syarat-ketentuan.html" },
+    { "source": "/app", "destination": "/moviu/app.html" },
+    { "source": "/app.html", "destination": "/moviu/app.html" },
+    { "source": "/style.css", "destination": "/moviu/style.css" },
+    { "source": "/script.js", "destination": "/moviu/script.js" },
+    { "source": "/transfer-core.js", "destination": "/moviu/transfer-core.js" },
+    { "source": "/manifest.webmanifest", "destination": "/moviu/manifest.webmanifest" },
+    { "source": "/moviu", "destination": "/moviu/index.html" },
+    { "source": "/moviu/(.*)", "destination": "/moviu/$1" }
+  ]
+}

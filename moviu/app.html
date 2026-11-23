@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#6255e7">
+  <meta name="description" content="Aplikasi Pindah Data Moviu — Wizard interaktif kemas foto, kontak, kalender, dan dokumen secara lokal tanpa server.">
+  <meta property="og:title" content="Aplikasi Pindah Data — Moviu">
+  <meta property="og:description" content="Kemas data HP lama ke HP baru langsung di browser tanpa perantara cloud.">
+  <meta property="og:type" content="website">
+  <title>Aplikasi Pindah Data — Moviu</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%236255e7'/><text x='50%' y='68%' fill='%23ffffff' font-family='sans-serif' font-size='65' font-weight='800' text-anchor='middle'>m</text></svg>">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <script src="transfer-core.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body style="background: var(--bg);">
+
+  <!-- App Header Bar -->
+  <header class="app-header-bar">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <a class="brand" href="./index.html" aria-label="Moviu, kembali ke beranda">
+        <span class="brand-mark">m</span>
+        <span>moviu<span class="brand-period">.</span></span>
+      </a>
+      <span class="app-status-badge">
+        <span class="dot"></span>
+        <span>Local-First (Memori Perangkat)</span>
+      </span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; font-size: 13px; font-weight: 600;">
+      <!-- Logged-in User Profile Bar -->
+      <div class="user-profile-bar" id="user-profile-widget" hidden>
+        <span class="user-avatar-circle" id="user-avatar">U</span>
+        <span id="user-display-name">Pengguna</span>
+        <button type="button" class="btn-logout" id="btn-logout" title="Keluar dari akun">Keluar</button>
+      </div>
+
+      <a href="./layanan.html#panduan" class="text-link" target="_blank" rel="noopener">📖 Panduan Ekspor</a>
+      <a href="./syarat-ketentuan.html" class="text-link" target="_blank" rel="noopener">🔒 Privasi (UU PDP)</a>
+      <a href="./index.html" class="button button-quiet button-small">← Ke Beranda</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- GERBANG AUTENTIKASI & PERSETUJUAN SYARAT KETENTUAN -->
+    <section class="auth-gate-wrap" id="auth-gate-section">
+      <div class="auth-gate-card">
+        <div class="auth-gate-head">
+          <div class="compliance-badge" style="margin-bottom: 8px;">
+            <span class="compliance-badge-icon">✓</span>
+            <span>Kepatuhan UU PDP No. 27/2022</span>
+          </div>
+          <h2 id="auth-title">Buat Akun untuk Memulai</h2>
+          <p id="auth-subtitle">Sebelum menggunakan layanan pengemasan data, daftarkan akun Anda dan setujui Syarat &amp; Ketentuan serta Kebijakan Privasi data kami.</p>
+        </div>
+
+        <!-- Alert messages -->
+        <div class="auth-error-box" id="auth-error" role="alert"></div>
+        <div class="auth-success-box" id="auth-success" role="status"></div>
+
+        <!-- Tabs Daftar / Masuk -->
+        <div class="auth-nav-tabs" role="tablist">
+          <button type="button" class="auth-tab-btn active" id="tab-auth-register" role="tab" aria-selected="true">
+            Daftar Akun Baru
+          </button>
+          <button type="button" class="auth-tab-btn" id="tab-auth-login" role="tab" aria-selected="false">
+            Sudah Punya Akun (Masuk)
+          </button>
+        </div>
+
+        <!-- Form 1: Registrasi Akun Baru -->
+        <form class="auth-form" id="form-register">
+          <div class="auth-field">
+            <label for="auth-name">Nama Lengkap:</label>
+            <input type="text" id="auth-name" placeholder="Contoh: Rian Prasetya" required autocomplete="name">
+          </div>
+
+          <div class="auth-field">
+            <label for="auth-email">Alamat Email:</label>
+            <input type="email" id="auth-email" placeholder="nama@email.com" required autocomplete="email">
+          </div>
+
+          <div class="auth-field">
+            <label for="auth-password">Kata Sandi:</label>
+            <input type="password" id="auth-password" placeholder="Minimal 6 karakter" required minlength="6" autocomplete="new-password">
+          </div>
+
+          <div class="auth-field">
+            <label for="auth-phone">Nomor WhatsApp / HP (Opsional):</label>
+            <input type="tel" id="auth-phone" placeholder="08xxxxxxxxxx" autocomplete="tel">
+          </div>
+
+          <!-- Checkbox Persetujuan Syarat & Kebijakan Privasi (WAJIB) -->
+          <div class="auth-checkbox-wrap">
+            <input type="checkbox" id="auth-terms-agree" required>
+            <label for="auth-terms-agree">
+              Saya menyatakan telah membaca, memahami, dan menyetujui seluruh isi 
+              <a href="./syarat-ketentuan.html" target="_blank" rel="noopener">Syarat &amp; Ketentuan Penggunaan</a> 
+              serta 
+              <a href="./syarat-ketentuan.html#kebijakan-privasi" target="_blank" rel="noopener">Kebijakan Privasi</a> 
+              Moviu yang berlandaskan <strong>UU Pelindungan Data Pribadi No. 27 Tahun 2022</strong>.
+            </label>
+          </div>
+
+          <button type="submit" class="button button-primary" id="btn-auth-register" style="width: 100%;">
+            Daftar &amp; Mulai Pindah Data →
+          </button>
+        </form>
+
+        <!-- Form 2: Masuk Akun yang Sudah Ada -->
+        <form class="auth-form" id="form-login" hidden>
+          <div class="auth-field">
+            <label for="auth-login-email">Alamat Email:</label>
+            <input type="email" id="auth-login-email" placeholder="nama@email.com" required autocomplete="email">
+          </div>
+
+          <div class="auth-field">
+            <label for="auth-login-password">Kata Sandi:</label>
+            <input type="password" id="auth-login-password" placeholder="Masukkan kata sandi" required autocomplete="current-password">
+          </div>
+
+          <!-- Checkbox Persetujuan Login -->
+          <div class="auth-checkbox-wrap">
+            <input type="checkbox" id="auth-login-terms-agree" checked required>
+            <label for="auth-login-terms-agree">
+              Saya tetap menyetujui <a href="./syarat-ketentuan.html" target="_blank" rel="noopener">Syarat &amp; Ketentuan serta Kebijakan Privasi</a> Moviu.
+            </label>
+          </div>
+
+          <button type="submit" class="button button-primary" id="btn-auth-login" style="width: 100%;">
+            Masuk &amp; Buka Aplikasi →
+          </button>
+        </form>
+
+        <div style="margin-top: 18px; text-align: center; font-size: 11.5px; color: #8792a7;">
+          🔒 Data kredensial dan berkas Anda disimpan secara aman &amp; lokal di perangkat Anda sesuai standar UU PDP.
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE TRANSFER FLOW WIZARD (HANYA DITAMPILKAN SETELAH LOGIN & SETUJU SYARAT) -->
+    <section class="flow-section" id="flow" hidden>
+      <div class="section-wrap flow-wrap">
+        <div class="flow-heading">
+          <div class="eyebrow" style="justify-content: center;"><span class="eyebrow-line"></span> WIZARD PINDAH DATA MOVIU</div>
+          <h2>Siapkan Paket Migrasimu</h2>
+          <p>Ikuti 5 langkah mudah untuk merapikan data sebelum pindah ke HP baru.</p>
+        </div>
+
+        <div class="flow-card">
+          <!-- Stepper Navigation -->
+          <div class="stepper" aria-label="Langkah pemindahan data">
+            <div class="step-indicator active" data-step-indicator="1"><span>1</span><small>Pilih Data</small></div><i></i>
+            <div class="step-indicator" data-step-indicator="2"><span>2</span><small>Ringkasan</small></div><i></i>
+            <div class="step-indicator" data-step-indicator="3"><span>3</span><small>Pilih Kategori</small></div><i></i>
+            <div class="step-indicator" data-step-indicator="4"><span>4</span><small>Proses</small></div><i></i>
+            <div class="step-indicator" data-step-indicator="5"><span>5</span><small>Selesai &amp; Unduh</small></div>
+          </div>
+
+          <!-- LANGKAH 1: PILIH PERANGKAT & MODE -->
+          <section class="flow-step" data-step="1">
+            <div class="step-title">
+              <span class="step-kicker">LANGKAH 1 DARI 5</span>
+              <h3>Pilih Perangkat &amp; Sumber File</h3>
+              <p>Tentukan tipe HP lama dan HP baru, lalu pilih file yang ingin dipindahkan.</p>
+            </div>
+
+            <!-- Device Selector -->
+            <div class="device-grid">
+              <label class="field-card">
+                <span class="field-label">HP Lama (Asal) <span class="device-symbol">↗</span></span>
+                <select id="source-device">
+                  <option value="Android (Samsung)">Samsung Galaxy (Android)</option>
+                  <option value="Android (Xiaomi)">Xiaomi / Redmi (Android)</option>
+                  <option value="Android (OPPO/vivo)">OPPO / vivo / realme (Android)</option>
+                  <option value="Android (Google Pixel)">Google Pixel (Android)</option>
+                  <option value="iPhone (iOS)">Apple iPhone (iOS)</option>
+                </select>
+                <small>Perangkat Asal</small>
+              </label>
+
+              <div class="swap-mark" aria-hidden="true" title="Arah migrasi data">⇄</div>
+
+              <label class="field-card">
+                <span class="field-label">HP Baru (Tujuan) <span class="device-symbol">↙</span></span>
+                <select id="target-device">
+                  <option value="iPhone (iOS)">Apple iPhone (iOS)</option>
+                  <option value="Android (Samsung)">Samsung Galaxy (Android)</option>
+                  <option value="Android (Google Pixel)">Google Pixel (Android)</option>
+                  <option value="Android (Xiaomi)">Xiaomi / Redmi (Android)</option>
+                  <option value="Android (OPPO/vivo)">OPPO / vivo (Android)</option>
+                </select>
+                <small>Perangkat Tujuan</small>
+              </label>
+            </div>
+
+            <!-- Mode Switch Tabs -->
+            <div class="mode-switch-wrap" role="tablist" aria-label="Pilihan mode pemrosesan">
+              <button type="button" class="mode-switch-btn active" id="tab-mode-files" role="tab" aria-selected="true" aria-controls="mode-files-content">
+                📁 Kemas File Sendiri (Nyata)
+              </button>
+              <button type="button" class="mode-switch-btn" id="tab-mode-sim" role="tab" aria-selected="false" aria-controls="mode-sim-content">
+                ⚡ Simulasi Demo Cepat
+              </button>
+            </div>
+
+            <!-- TAB 1: FILE REAL DROPZONE -->
+            <div id="mode-files-content">
+              <input class="visually-hidden" id="file-input" type="file" multiple accept="image/*,video/*,.vcf,.vcard,.ics,.ical,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt,.ods,.odp,.csv,.md">
+              <label class="visually-hidden" for="file-input">Pilih foto, video, kontak, kalender, atau dokumen</label>
+
+              <div class="file-drop-zone" id="drop-zone" tabindex="0" role="group" aria-label="Area pilih atau jatuhkan file">
+                <div class="drop-icon" aria-hidden="true">↑</div>
+                <strong>Tambahkan file yang ingin dipindahkan</strong>
+                <span>Foto, video, berkas kontak .vcf, agenda .ics, atau dokumen</span>
+                <button type="button" class="button button-outline" id="pick-files" aria-controls="file-input">Pilih File dari Perangkat</button>
+                <small>Di HP: pilih dari Galeri atau aplikasi File. Di Komputer: seret dan jatuhkan berkas ke area ini.</small>
+              </div>
+
+              <!-- Quick sample loader for testing without own files -->
+              <div class="sample-data-box">
+                <div>
+                  <strong>Belum punya file ekspor sekarang?</strong>
+                  <div>Gunakan data contoh (vcf kontak, ics kalender, dokumen, foto) untuk menguji langsung.</div>
+                </div>
+                <button type="button" class="button button-quiet" id="load-sample-files">✨ Gunakan Data Contoh</button>
+              </div>
+
+              <div class="file-selection-head">
+                <strong>Daftar File Terpilih</strong>
+                <button type="button" class="button-link" id="clear-files" hidden>Kosongkan Semua</button>
+              </div>
+              <div class="file-selection-status" id="file-selection-status" aria-live="polite">Belum ada file yang dipilih.</div>
+              <div class="picked-file-list" id="picked-file-list"></div>
+            </div>
+
+            <!-- TAB 2: SIMULASI CLOUD PROTOTYPE -->
+            <div id="mode-sim-content" hidden>
+              <div class="cloud-connect">
+                <div class="cloud-icon" aria-hidden="true">☁</div>
+                <div class="cloud-copy">
+                  <strong>Hubungkan Akun Cloud Lama (Simulasi)</strong>
+                  <span>Simulasi memindai Google Drive / iCloud dari HP lamamu untuk pengujian alur interaktif.</span>
+                </div>
+                <button type="button" class="button button-outline" id="connect-cloud">Hubungkan Akun</button>
+              </div>
+              <div class="connection-status" id="connection-status" aria-live="polite">Belum terhubung ke akun simulasi.</div>
+            </div>
+
+            <!-- Step Actions -->
+            <div class="step-actions">
+              <span class="privacy-note">🔒 File diproses aman tanpa dikirim ke server.</span>
+              <button type="button" class="button button-primary" id="to-review" disabled>Periksa File Terpilih <span>→</span></button>
+            </div>
+          </section>
+
+          <!-- LANGKAH 2: RINGKASAN PINDAI / HASIL PEMILIHAN -->
+          <section class="flow-step" data-step="2" hidden>
+            <div class="step-title">
+              <span class="step-kicker">LANGKAH 2 DARI 5</span>
+              <h3>Ringkasan File yang Akan Dipindahkan</h3>
+              <p>Periksa rincian data dari perangkat asal sebelum dimasukkan ke dalam paket.</p>
+            </div>
+
+            <div style="text-align: center;">
+              <span class="device-pair-badge" id="scan-device-badge">Android Lama ➔ iPhone Baru</span>
+            </div>
+
+            <div class="scan-grid" id="scan-grid"></div>
+
+            <div class="scan-note">
+              <span>✦</span> File asli di HP lamamu tidak akan terhapus atau berubah. Moviu hanya menyusun salinan ke dalam arsip ZIP yang rapi.
+            </div>
+
+            <div class="review-file-list" id="review-file-list"></div>
+
+            <div class="step-actions">
+              <button type="button" class="button button-quiet" data-back="1">← Kembali</button>
+              <button type="button" class="button button-primary" data-next="3">Pilih Kategori <span>→</span></button>
+            </div>
+          </section>
+
+          <!-- LANGKAH 3: CHECKBOX KATEGORI -->
+          <section class="flow-step" data-step="3" hidden>
+            <div class="step-title">
+              <span class="step-kicker">LANGKAH 3 DARI 5</span>
+              <h3>Pilih Kategori yang Ingin Dipindah</h3>
+              <p>Centang kategori yang dibutuhkan. Kategori yang tidak dicentang akan dilewati.</p>
+            </div>
+
+            <div class="selection-list" id="selection-list"></div>
+
+            <div class="selection-summary">
+              <span>Total ukuran data yang dipilih:</span>
+              <strong id="selected-size">0 B</strong>
+            </div>
+
+            <div class="step-actions">
+              <button type="button" class="button button-quiet" data-back="2">← Kembali</button>
+              <button type="button" class="button button-primary" id="prepare-transfer">Mulai Proses Pemindahan <span>→</span></button>
+            </div>
+          </section>
+
+          <!-- LANGKAH 4: PROGRESS BAR & RECOVERY -->
+          <section class="flow-step" data-step="4" hidden>
+            <div class="step-title">
+              <span class="step-kicker">LANGKAH 4 DARI 5</span>
+              <h3 id="transfer-heading">Menyiapkan Paket Data</h3>
+              <p id="transfer-caption">Mohon tunggu hingga file selesai diproses dan disusun ke dalam paket ZIP.</p>
+            </div>
+
+            <div class="overall-progress">
+              <div class="progress-label">
+                <span id="progress-label">Kemajuan Pemrosesan</span>
+                <strong id="progress-number">0%</strong>
+              </div>
+              <div class="progress-track"><span id="overall-bar"></span></div>
+            </div>
+
+            <!-- Per-category progress for simulation mode -->
+            <div id="category-progress-wrap" hidden>
+              <div class="category-progress-box" id="category-progress"></div>
+            </div>
+
+            <div class="package-current" id="package-current" aria-live="polite">Menyiapkan…</div>
+
+            <!-- Simulated Interruption Card at 60% -->
+            <div class="connection-lost" id="connection-lost" hidden>
+              <div class="lost-icon" aria-hidden="true">⚠</div>
+              <div>
+                <strong>Koneksi Simulasi Terputus di 60%</strong>
+                <p>Jangan panik! Progres data yang sudah diproses tetap tersimpan. Kamu bisa melanjutkan tanpa mengulang dari nol.</p>
+              </div>
+              <button type="button" class="button button-primary" id="resume-transfer">Lanjutkan dari 60%</button>
+            </div>
+
+            <div class="privacy-inline">
+              <span aria-hidden="true">🔒</span> Pemrosesan berjalan di browser perangkatmu. Jangan tutup tab ini sampai selesai.
+            </div>
+
+            <div class="package-error" id="package-error" role="alert" hidden></div>
+
+            <div class="step-actions">
+              <button type="button" class="button button-quiet" id="back-selection">← Ubah Pilihan</button>
+              <button type="button" class="button button-primary" id="to-download" disabled>Lihat Hasil &amp; Unduh <span>→</span></button>
+            </div>
+          </section>
+
+          <!-- LANGKAH 5: LAPORAN AKHIR & UNDUH -->
+          <section class="flow-step" data-step="5" hidden>
+            <div class="complete-icon" aria-hidden="true">✓</div>
+            <div class="step-title result-title">
+              <span class="step-kicker">LANGKAH 5 DARI 5</span>
+              <h3>Paket Moviu Siap Dibawa ke HP Baru</h3>
+              <p>Paket arsip berhasil dibuat lengkap dengan instruksi cara impor data.</p>
+            </div>
+
+            <!-- Package Summary Metadata -->
+            <div class="package-summary" id="package-summary"></div>
+
+            <!-- Audit Results breakdown -->
+            <div class="result-summary" id="result-summary"></div>
+
+            <!-- Big Download Button -->
+            <div style="margin: 24px auto 0; text-align: center;">
+              <button type="button" class="button button-primary download-button" id="download-package">
+                Unduh Paket Moviu (.zip) <span>↓</span>
+              </button>
+              <div class="download-status" id="download-status" aria-live="polite"></div>
+            </div>
+
+            <div class="result-disclaimer">
+              Foto, video, dan dokumen tersimpan dalam format aslinya. Untuk berkas kontak <code>.vcf</code> dan kalender <code>.ics</code>, ekstrak ZIP di HP baru lalu buka berkas tersebut untuk mengimpor ke buku telepon dan kalender.
+            </div>
+
+            <div class="step-actions">
+              <button type="button" class="button button-quiet" id="back-home">← Kembali ke Beranda</button>
+              <button type="button" class="button button-outline" id="start-over">Siapkan Paket Lain <span>↻</span></button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- TOAST FEEDBACK NOTIFICATION -->
+  <div class="toast-msg" id="toast" role="status" aria-live="polite">
+    <span class="toast-dot" aria-hidden="true"></span>
+    <span id="toast-text">Pemberitahuan</span>
+  </div>
+
+  <footer class="site-footer section-wrap" style="margin-top: 40px; border-top: 1px solid var(--line); padding-top: 24px;">
+    <div style="text-align: center; color: var(--muted); font-size: 13px;">
+      Moviu — 100% Client-Side In-Memory Utility · Kepatuhan UU PDP No. 27/2022
+    </div>
+  </footer>
+
+</body>
+</html>
