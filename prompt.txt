@@ -1,0 +1,14 @@
+Kamu developer web. Aku mahasiswa Bisnis Digital, bukan IT, jadi balas singkat dan simpel. Kerja HANYA di folder ini (repo GitHub-ku). Pertama, jalankan git pull dan pastikan repo ini terhubung ke GitHub.
+
+Bikin prototype web app "Pindahin": layanan netral yang memindahkan data saat ganti HP beda sistem (Android ke iPhone, iPhone ke Android, merek ke merek). Pakai HTML, CSS, JavaScript biasa tanpa backend dan tanpa library. File: index.html, style.css, script.js. Teks bahasa Indonesia, tampilan modern dan responsif di HP.
+
+Alur yang bisa diklik dalam satu halaman:
+1. Landing: penjelasan masalah (data tersebar di banyak tempat sehingga ada yang ketinggalan), bagian harga (Gratis untuk data kecil, Berbayar untuk data besar), tombol "Mulai Pindah Data".
+2. Pilih HP asal dan HP tujuan, tombol hubungkan akun cloud lama (simulasi).
+3. Ringkasan pindai (data dummy): jumlah foto, video, kontak, kalender, dokumen.
+4. Checkbox pilih data yang dipindah, tombol "Pindahkan".
+5. Progress bar per kategori (simulasi). Di sekitar 60% koneksi putus, lalu tombol "Lanjutkan dari titik terakhir" melanjutkan dari 60%, bukan dari nol.
+6. Laporan akhir: apa yang berhasil dan gagal beserta alasannya (data dummy), tombol "Pindah lagi".
+Banner kecil di atas: "Prototype demo, data yang tampil adalah simulasi".
+
+Setelah selesai: git add, commit dengan pesan jelas, lalu git push ke GitHub. Kalau push gagal, cari penyebabnya dan benerin. Terakhir kasih tahu cara membukanya di browser. 
