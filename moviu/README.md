@@ -39,19 +39,23 @@ Berdasarkan analisis masalah penyimpanan cloud pada proyek Kelompok 5 AI:
 
 ---
 
-## 📁 Struktur File
+## 📁 Struktur File & Halaman
 
 ```
 moviu/
-├── index.html                  # Halaman web utama & antarmuka alur wizard
-├── style.css                   # Gaya modern, responsif, dan ramah aksesibilitas
-├── script.js                   # Logika interaktif antarmuka, wizard, dan event
+├── index.html                  # Landing Page utama yang menjelaskan Moviu secara umum
+├── layanan.html                # Gabungan Cara Kerja, Panduan Ekspor (Android/iOS/WA), & Pilihan Harga
+├── syarat-ketentuan.html       # Halaman Syarat & Ketentuan serta Kebijakan Privasi (Kepatuhan UU PDP 2022)
+├── app.html                    # Halaman aplikasi interaktif mandiri (Wizard 5 Langkah)
+├── style.css                   # Gaya modern, responsif, komponen legal, dan ramah aksesibilitas
+├── script.js                   # Logika interaktif antarmuka wizard, stepper, drag-drop, dan recovery
 ├── transfer-core.js            # Engine kemas ZIP lokal (CRC32, binary header, state machine)
 ├── manifest.webmanifest        # Konfigurasi PWA untuk instalasi di layar utama HP
+├── vercel.json                 # Konfigurasi deployment Vercel
 ├── tests/
 │   ├── transfer-core.test.cjs  # Pengujian unit klasifikasi, ringkasan, dan integritas ZIP
 │   ├── simulation.test.cjs     # Pengujian mesin status simulasi & pemulihan 60%
-│   └── validate-dom.cjs        # Pengujian konsistensi elemen DOM index.html vs script.js
+│   └── validate-dom.cjs        # Pengujian keberadaan halaman dan elemen DOM interaktif
 └── README.md                   # Dokumentasi lengkap proyek Moviu
 ```
 

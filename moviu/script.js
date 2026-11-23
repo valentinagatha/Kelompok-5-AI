@@ -580,91 +580,352 @@
     $('#flow').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  const AUTH_STORAGE_KEY = 'moviu_auth_user';
+  const USERS_STORAGE_KEY = 'moviu_registered_users';
+
+  function getStoredUser() {
+    try {
+      const data = localStorage.getItem(AUTH_STORAGE_KEY);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function getRegisteredUsers() {
+    try {
+      const data = localStorage.getItem(USERS_STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function setStoredUser(user) {
+    try {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+    } catch (e) {}
+  }
+
+  function clearStoredUser() {
+    try {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    } catch (e) {}
+  }
+
+  function checkAuthState() {
+    const user = getStoredUser();
+    const authGate = $('#auth-gate-section');
+    const flowSection = $('#flow');
+    const profileWidget = $('#user-profile-widget');
+    const userAvatar = $('#user-avatar');
+    const userDisplayName = $('#user-display-name');
+
+    if (user && user.agreedToTerms) {
+      if (authGate) authGate.hidden = true;
+      if (flowSection) flowSection.hidden = false;
+      if (profileWidget) {
+        profileWidget.hidden = false;
+        if (userAvatar) userAvatar.textContent = (user.name || 'U').charAt(0).toUpperCase();
+        if (userDisplayName) userDisplayName.textContent = user.name || 'Pengguna';
+      }
+      return true;
+    } else {
+      if (authGate) authGate.hidden = false;
+      if (flowSection) flowSection.hidden = true;
+      if (profileWidget) profileWidget.hidden = true;
+      return false;
+    }
+  }
+
+  function setupAuthHandlers() {
+    const tabRegister = $('#tab-auth-register');
+    const tabLogin = $('#tab-auth-login');
+    const formRegister = $('#form-register');
+    const formLogin = $('#form-login');
+    const errorBox = $('#auth-error');
+    const successBox = $('#auth-success');
+    const btnLogout = $('#btn-logout');
+
+    function showError(msg) {
+      if (!errorBox) return;
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+      if (successBox) successBox.style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+      if (!successBox) return;
+      successBox.textContent = msg;
+      successBox.style.display = 'block';
+      if (errorBox) errorBox.style.display = 'none';
+    }
+
+    function clearAlerts() {
+      if (errorBox) errorBox.style.display = 'none';
+      if (successBox) successBox.style.display = 'none';
+    }
+
+    if (tabRegister && tabLogin) {
+      tabRegister.addEventListener('click', () => {
+        tabRegister.classList.add('active');
+        tabLogin.classList.remove('active');
+        if (formRegister) formRegister.hidden = false;
+        if (formLogin) formLogin.hidden = true;
+        clearAlerts();
+      });
+
+      tabLogin.addEventListener('click', () => {
+        tabLogin.classList.add('active');
+        tabRegister.classList.remove('active');
+        if (formLogin) formLogin.hidden = false;
+        if (formRegister) formRegister.hidden = true;
+        clearAlerts();
+      });
+    }
+
+    if (formRegister) {
+      formRegister.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearAlerts();
+
+        const nameInput = $('#auth-name');
+        const emailInput = $('#auth-email');
+        const passwordInput = $('#auth-password');
+        const phoneInput = $('#auth-phone');
+        const termsCheck = $('#auth-terms-agree');
+
+        if (!termsCheck || !termsCheck.checked) {
+          showError('Anda wajib menyetujui Syarat & Ketentuan serta Kebijakan Privasi sesuai UU PDP No. 27/2022.');
+          return;
+        }
+
+        const name = nameInput ? nameInput.value.trim() : '';
+        const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+        const password = passwordInput ? passwordInput.value : '';
+        const phone = phoneInput ? phoneInput.value.trim() : '';
+
+        if (!name || !email || !password) {
+          showError('Mohon isi nama lengkap, email, dan kata sandi.');
+          return;
+        }
+
+        if (password.length < 6) {
+          showError('Kata sandi minimal 6 karakter.');
+          return;
+        }
+
+        const users = getRegisteredUsers();
+        if (users.some((u) => u.email === email)) {
+          showError('Alamat email ini sudah terdaftar. Silakan pindah ke tab "Sudah Punya Akun (Masuk)".');
+          return;
+        }
+
+        const newUser = {
+          name,
+          email,
+          password,
+          phone,
+          agreedToTerms: true,
+          agreedAt: new Date().toISOString()
+        };
+
+        users.push(newUser);
+        try {
+          localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+        } catch (err) {}
+
+        setStoredUser({
+          name: newUser.name,
+          email: newUser.email,
+          phone: newUser.phone,
+          agreedToTerms: true,
+          agreedAt: newUser.agreedAt
+        });
+
+        showSuccess('Akun berhasil dibuat! Mengalihkan ke aplikasi pemindahan data…');
+        showToast('Pendaftaran akun berhasil!');
+
+        setTimeout(() => {
+          checkAuthState();
+          showToast(`Selamat datang, ${newUser.name}!`);
+        }, 500);
+      });
+    }
+
+    if (formLogin) {
+      formLogin.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearAlerts();
+
+        const emailInput = $('#auth-login-email');
+        const passwordInput = $('#auth-login-password');
+        const termsCheck = $('#auth-login-terms-agree');
+
+        if (!termsCheck || !termsCheck.checked) {
+          showError('Anda wajib mencentang persetujuan Syarat & Ketentuan serta Kebijakan Privasi.');
+          return;
+        }
+
+        const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+        const password = passwordInput ? passwordInput.value : '';
+
+        const users = getRegisteredUsers();
+        const found = users.find((u) => u.email === email);
+
+        if (!found || found.password !== password) {
+          if (users.length === 0) {
+            showError('Belum ada akun yang terdaftar. Silakan buat akun baru di tab "Daftar Akun Baru".');
+          } else {
+            showError('Email atau kata sandi tidak cocok.');
+          }
+          return;
+        }
+
+        setStoredUser({
+          name: found.name,
+          email: found.email,
+          phone: found.phone,
+          agreedToTerms: true,
+          agreedAt: new Date().toISOString()
+        });
+
+        showSuccess('Berhasil masuk! Membuka aplikasi…');
+        showToast(`Selamat datang kembali, ${found.name}!`);
+
+        setTimeout(() => {
+          checkAuthState();
+        }, 400);
+      });
+    }
+
+    if (btnLogout) {
+      btnLogout.addEventListener('click', () => {
+        clearStoredUser();
+        checkAuthState();
+        showToast('Anda telah keluar dari akun Moviu.');
+      });
+    }
+  }
+
   function init() {
+    setupAuthHandlers();
+    checkAuthState();
+
     if (!core) {
-      $('#file-selection-status').textContent = 'Modul pemrosesan transfer belum termuat. Silakan muat ulang halaman.';
+      if ($('#file-selection-status')) {
+        $('#file-selection-status').textContent = 'Modul pemrosesan transfer belum termuat. Silakan muat ulang halaman.';
+      }
       return;
     }
 
-    renderPickedFiles();
+    if ($('#picked-file-list')) {
+      renderPickedFiles();
+    }
 
     // Mode tabs
-    $('#tab-mode-files').addEventListener('click', () => setMode('files'));
-    $('#tab-mode-sim').addEventListener('click', () => setMode('sim'));
+    if ($('#tab-mode-files')) {
+      $('#tab-mode-files').addEventListener('click', () => setMode('files'));
+    }
+    if ($('#tab-mode-sim')) {
+      $('#tab-mode-sim').addEventListener('click', () => setMode('sim'));
+    }
 
-    // CTAs
+    // CTAs for in-page flow triggers
     $$('[data-start]').forEach((link) => {
       link.addEventListener('click', (event) => {
-        event.preventDefault();
-        startFlow(false);
+        if ($('#flow') && $('#flow').hidden) {
+          event.preventDefault();
+          startFlow(false);
+        }
       });
     });
 
     $$('[data-start-demo]').forEach((link) => {
       link.addEventListener('click', (event) => {
-        event.preventDefault();
-        startFlow(true);
+        if ($('#flow') && $('#flow').hidden) {
+          event.preventDefault();
+          startFlow(true);
+        }
       });
     });
 
     // File input & Drag/Drop
-    $('#pick-files').addEventListener('click', () => $('#file-input').click());
-    $('#file-input').addEventListener('change', (event) => addFiles(event.target.files));
+    if ($('#pick-files') && $('#file-input')) {
+      $('#pick-files').addEventListener('click', () => $('#file-input').click());
+      $('#file-input').addEventListener('change', (event) => addFiles(event.target.files));
+    }
 
-    $('#drop-zone').addEventListener('keydown', (event) => {
-      if (event.target === $('#drop-zone') && (event.key === 'Enter' || event.key === ' ')) {
+    if ($('#drop-zone') && $('#file-input')) {
+      $('#drop-zone').addEventListener('keydown', (event) => {
+        if (event.target === $('#drop-zone') && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          $('#file-input').click();
+        }
+      });
+
+      $('#drop-zone').addEventListener('dragover', (event) => {
         event.preventDefault();
-        $('#file-input').click();
-      }
-    });
+        $('#drop-zone').classList.add('drag-over');
+      });
 
-    $('#drop-zone').addEventListener('dragover', (event) => {
-      event.preventDefault();
-      $('#drop-zone').classList.add('drag-over');
-    });
+      $('#drop-zone').addEventListener('dragleave', () => {
+        $('#drop-zone').classList.remove('drag-over');
+      });
 
-    $('#drop-zone').addEventListener('dragleave', () => {
-      $('#drop-zone').classList.remove('drag-over');
-    });
-
-    $('#drop-zone').addEventListener('drop', (event) => {
-      event.preventDefault();
-      $('#drop-zone').classList.remove('drag-over');
-      addFiles(event.dataTransfer.files);
-    });
+      $('#drop-zone').addEventListener('drop', (event) => {
+        event.preventDefault();
+        $('#drop-zone').classList.remove('drag-over');
+        addFiles(event.dataTransfer.files);
+      });
+    }
 
     // Quick sample loader button
-    $('#load-sample-files').addEventListener('click', loadSampleData);
+    if ($('#load-sample-files')) {
+      $('#load-sample-files').addEventListener('click', loadSampleData);
+    }
 
     // Picked files list management
-    $('#picked-file-list').addEventListener('click', (event) => {
-      const button = event.target.closest('[data-remove-file]');
-      if (!button) return;
-      const index = Number(button.dataset.removeFile);
-      selectedFiles.splice(index, 1);
-      renderPickedFiles();
-      showToast('File dihapus dari daftar.');
-    });
+    if ($('#picked-file-list')) {
+      $('#picked-file-list').addEventListener('click', (event) => {
+        const button = event.target.closest('[data-remove-file]');
+        if (!button) return;
+        const index = Number(button.dataset.removeFile);
+        selectedFiles.splice(index, 1);
+        renderPickedFiles();
+        showToast('File dihapus dari daftar.');
+      });
+    }
 
-    $('#clear-files').addEventListener('click', () => {
-      selectedFiles = [];
-      renderPickedFiles();
-      showToast('Semua file dikosongkan.');
-    });
+    if ($('#clear-files')) {
+      $('#clear-files').addEventListener('click', () => {
+        selectedFiles = [];
+        renderPickedFiles();
+        showToast('Semua file dikosongkan.');
+      });
+    }
 
     // Cloud connect simulation
-    $('#connect-cloud').addEventListener('click', () => {
-      simCloudConnected = true;
-      $('#connect-cloud').textContent = 'Terhubung ✓';
-      $('#connect-cloud').disabled = true;
-      const src = $('#source-device') ? $('#source-device').value : 'Android';
-      $('#connection-status').textContent = `Akun cloud simulasi terhubung · ${src}`;
-      $('#to-review').disabled = false;
-      showToast('Akun cloud simulasi berhasil dihubungkan!');
-    });
+    if ($('#connect-cloud')) {
+      $('#connect-cloud').addEventListener('click', () => {
+        simCloudConnected = true;
+        $('#connect-cloud').textContent = 'Terhubung ✓';
+        $('#connect-cloud').disabled = true;
+        const src = $('#source-device') ? $('#source-device').value : 'Android';
+        if ($('#connection-status')) {
+          $('#connection-status').textContent = `Akun cloud simulasi terhubung · ${src}`;
+        }
+        if ($('#to-review')) {
+          $('#to-review').disabled = false;
+        }
+        showToast('Akun cloud simulasi berhasil dihubungkan!');
+      });
+    }
 
     // Wizard navigation
-    $('#to-review').addEventListener('click', () => goToStep(2));
+    if ($('#to-review')) {
+      $('#to-review').addEventListener('click', () => goToStep(2));
+    }
     $$('[data-next]').forEach((button) => {
       button.addEventListener('click', () => goToStep(Number(button.dataset.next)));
     });
@@ -672,26 +933,52 @@
       button.addEventListener('click', () => goToStep(Number(button.dataset.back)));
     });
 
-    $('#prepare-transfer').addEventListener('click', () => goToStep(4));
-    $('#back-selection').addEventListener('click', () => {
-      if (!packageBusy) goToStep(3);
-    });
-    $('#to-download').addEventListener('click', () => goToStep(5));
+    if ($('#prepare-transfer')) {
+      $('#prepare-transfer').addEventListener('click', () => goToStep(4));
+    }
+    if ($('#back-selection')) {
+      $('#back-selection').addEventListener('click', () => {
+        if (!packageBusy) goToStep(3);
+      });
+    }
+    if ($('#to-download')) {
+      $('#to-download').addEventListener('click', () => goToStep(5));
+    }
 
     // Simulation resume button (at 60%)
-    $('#resume-transfer').addEventListener('click', () => {
-      simTransferState = core.resumeTransfer(simTransferState);
-      showToast('Melanjutkan transfer dari 60%…');
-      executeSimulatedTransfer();
-    });
+    if ($('#resume-transfer')) {
+      $('#resume-transfer').addEventListener('click', () => {
+        simTransferState = core.resumeTransfer(simTransferState);
+        showToast('Melanjutkan transfer dari 60%…');
+        executeSimulatedTransfer();
+      });
+    }
 
     // Step 5 Actions
-    $('#download-package').addEventListener('click', startDownload);
-    $('#start-over').addEventListener('click', resetApplication);
-    $('#back-home').addEventListener('click', () => {
-      $('#flow').hidden = true;
-      window.location.hash = 'beranda';
-    });
+    if ($('#download-package')) {
+      $('#download-package').addEventListener('click', startDownload);
+    }
+    if ($('#start-over')) {
+      $('#start-over').addEventListener('click', resetApplication);
+    }
+    if ($('#back-home')) {
+      $('#back-home').addEventListener('click', () => {
+        window.location.href = './index.html';
+      });
+    }
+
+    // Check URL parameters for direct mode launch (e.g., app.html?mode=demo)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const modeParam = urlParams.get('mode');
+      if (modeParam === 'demo') {
+        setTimeout(() => loadSampleData(), 200);
+      } else if (modeParam === 'sim') {
+        setTimeout(() => setMode('sim'), 200);
+      }
+    } catch (e) {
+      // Ignore URL parsing errors on older environments
+    }
   }
 
   document.addEventListener('DOMContentLoaded', init, { once: true });
