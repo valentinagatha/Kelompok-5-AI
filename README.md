@@ -1,5 +1,14 @@
 # Kelompok-5-AI
 
+Koleksi proyek prototipe dan solusi inovasi digital berbasis AI & web tanpa ketergantungan cloud oleh Kelompok 5 AI.
+
+### 📱 Proyek Web dalam Repositori:
+- **[Moviu](moviu/)** — Layanan *local-first* untuk memindahkan data (foto, kontak `.vcf`, kalender `.ics`, dokumen) saat ganti HP lintas merek & sistem operasi (Android ↔ iPhone) tanpa cloud. 100% privat di peramban.
+- **[Rumahku](rumahku/)** — Studio webapp game desain ruangan 3D (gratis, tanpa koin atau paywall).
+- **[SortSnap](sortsnap-app/)** — Aplikasi web penyortir dan pengelompok foto pintar secara otomatis.
+
+---
+
 ## Masalah dalam Cloud System:
 1. memerlukan internet yg stabil untuk bisa mengakses data-data di cloud sehingga tidak accessible kapan saja dan di mana saja
 2. seringkali lupa mematikan setting sinkronisasi cloud ketika ingin menghapus data dari satu device sehingga di cloud ikut terhapus
